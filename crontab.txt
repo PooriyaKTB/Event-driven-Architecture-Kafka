@@ -1,0 +1,4 @@
+0 * * * * System.out.println("first job")
+10 * * * * System.out.println("second job)
+* * * * * System.out.println("third job")
+0 1 * * * System.out.println("last job")
