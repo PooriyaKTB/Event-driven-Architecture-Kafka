@@ -1,3 +1,5 @@
+package cronJobScheduler;
+
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
@@ -37,6 +39,7 @@ public class ParseCronTab {
                 JobDetail job = JobBuilder.newJob(CronScheduleCreator.class)
                         .withIdentity("CronJob" + lineNumber, "CronGroup")
                         .usingJobData("lineNumber", lineNumber)
+                        .usingJobData("command", getCommand(line))
                         .build();
 
                 scheduler.scheduleJob(job, trigger);
@@ -52,7 +55,7 @@ public class ParseCronTab {
         }
     }
 
-    static String getQuartzCron(String line) {
+    public static String getQuartzCron(String line) {
 
         String[] cronParts = line.split("\\s+", 6);
 
@@ -75,5 +78,11 @@ public class ParseCronTab {
         }
 
         return "0 " + min + " " + hour + " " + dayOfMonth + " " + month + " " + dayOfWeek;
+    }
+
+    static String getCommand(String line) {
+
+        String[] cronParts = line.split("\\s+", 6);
+        return cronParts.length == 6 ? cronParts[5] : "";
     }
 }

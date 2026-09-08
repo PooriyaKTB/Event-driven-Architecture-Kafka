@@ -52,7 +52,6 @@ public class Producer {
         config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
 
 //        Create producer base on config
-        KafkaProducer<String, String> producer = new KafkaProducer<>(config);
-        return producer;
+        return new KafkaProducer<>(config);
     }
 }

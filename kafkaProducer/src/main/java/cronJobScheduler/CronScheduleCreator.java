@@ -1,3 +1,5 @@
+package cronJobScheduler;
+
 import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +12,7 @@ public class CronScheduleCreator implements Job {
 
         JobDataMap dataMap = context.getMergedJobDataMap();
         int lineNumber = dataMap.getInt("lineNumber");
-        log.info("Running job " + lineNumber);
+        String command = dataMap.getString("command");
+        log.info("Running job " + lineNumber + " " + command);
     }
 }

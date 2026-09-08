@@ -32,3 +32,26 @@ services:
 
       # Configure 2 partition
       KAFKA_NUM_PARTITIONS: 2
+
+  producer:
+    build: ./kafkaProducer
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_BROKER: kafka:9092
+
+  consumer-1:
+    build: ./kafkaConsumer
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_BROKER: kafka:9092
+      CONSUMER_ID: consumer-1
+
+  consumer-2:
+    build: ./kafkaConsumer
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_BROKER: kafka:9092
+      CONSUMER_ID: consumer-2
