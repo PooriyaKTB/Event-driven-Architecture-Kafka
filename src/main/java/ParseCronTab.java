@@ -1,5 +1,7 @@
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -7,6 +9,8 @@ import java.io.IOException;
 
 public class ParseCronTab {
     public static void startApp(String fileName) {
+
+        Logger log = LoggerFactory.getLogger(ParseCronTab.class);
 
         try (
                 BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
@@ -16,13 +20,14 @@ public class ParseCronTab {
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
 
             while ((line = reader.readLine()) != null) {
-                if (line.trim().isEmpty()) {
+                line = line.trim();
+                if (line.isEmpty() || line.startsWith("#")) {
                     continue;
                 }
 
                 String quartzCron = getQuartzCron(line);
 
-                System.out.println("Line " + lineNumber + " -> Quartz expression: " + quartzCron);
+                log.info("Line " + lineNumber + " -> Quartz expression: " + quartzCron);
 
                 Trigger trigger = TriggerBuilder.newTrigger()
                         .withIdentity("CronTrigger" + lineNumber, "CronGroup")
@@ -47,9 +52,16 @@ public class ParseCronTab {
         }
     }
 
-    private static String getQuartzCron(String line) {
+    static String getQuartzCron(String line) {
 
-        String[] cronParts = line.split("\\s+");
+        String[] cronParts = line.split("\\s+", 6);
+
+        if (cronParts.length < 5) {
+            throw new IllegalArgumentException(
+                    "Expected 5 schedule fields (minute hour day-of-month month day-of-week) but found "
+                            + cronParts.length + " in: " + line);
+        }
+
         String min = cronParts[0];
         String hour = cronParts[1];
         String dayOfMonth = cronParts[2];

@@ -15,6 +15,7 @@ public class Producer {
 
         final Logger log = LoggerFactory.getLogger(Producer.class);
 
+//        getProducer() helper method used
         KafkaProducer<String, String> producer = getProducer();
 
 //         Sample message
@@ -55,24 +56,3 @@ public class Producer {
         return producer;
     }
 }
-    /*
-        Properties config = new Properties();
-
-        config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-
-        config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-
-        KafkaProducer<String, String> producer = new KafkaProducer<>(config);
-
-        String topic = "cron-jobs";
-        String key = UUID.randomUUID().toString();
-        String messagePayload = "{\"jobId\": 1, \"command\": \"echo Hello\"}";
-
-        ProducerRecord<String, String> record = new ProducerRecord<>(topic, key, messagePayload);
-
-        producer.send(record);
-
-        producer.close();
-        System.out.println("Message sent successfully!");
-    */
