@@ -1,5 +1,6 @@
 package cronJob;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -13,47 +14,50 @@ import org.slf4j.LoggerFactory;
 import java.util.Properties;
 import java.util.UUID;
 
-public class JobPublisher {
+public class JobPublisher implements AutoCloseable {
 
     private static final Logger log = LoggerFactory.getLogger(JobPublisher.class);
 
-    public static void publishJob() {
+    public static final String CONTEXT_KEY = "jobPublisher";
+    private static final String TOPIC  = "cron-jobs";
+    private static final String BOOTSTRAP_SERVERS = "localhost:9092";
 
-        ObjectMapper mapper = new ObjectMapper()
-                .registerModule(new JavaTimeModule())
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    private final KafkaProducer<String, String> producer = getProducer();
 
-//        getProducer() helper method used
-        KafkaProducer<String, String> producer = getProducer();
+    private final ObjectMapper mapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-//         Sample message
-        String topic = "cron-jobs";
+
+    public void publishJob(CronJobMessage message) {
+        String messagePayload;
+
+        try {
+            messagePayload = mapper.writeValueAsString(message);
+        } catch(JsonProcessingException e){
+            throw new IllegalStateException("Could not serialise message for job " + message.jobId(), e);
+        }
+
         String key = UUID.randomUUID().toString();
-        String messagePayload = "{\"message\": \"Hello World from Pooriya\"}";
 
-        final ProducerRecord<String, String> kafkaRecord = new ProducerRecord<>(topic, key, messagePayload);
+        final ProducerRecord<String, String> kafkaRecord = new ProducerRecord<>(TOPIC, key, messagePayload);
 
 //        Send to Kafka
-//        producer.send(record);
         producer.send(kafkaRecord, (metadata, exception) -> {
             if (exception == null) {
-                log.info("Sent! Partition: {}, Offset: {}", metadata.partition(), metadata.offset());
+                log.info("Published job {} to partition {} at offset {}", message.jobId(), metadata.partition(), metadata.offset());
             } else {
-                log.error("Error sending message: " + exception.getMessage());
+                log.error("Failed to publish job {}", message.jobId(), exception);
             }
         });
-
-//        Close the connection when it's done
-        producer.close();
-        log.info("Message sent successfully!");
     }
 
-    private static KafkaProducer<String, String> getProducer() {
+    private KafkaProducer<String, String> getProducer() {
 
         Properties config = new Properties();
 
 //        Where is kafka? on local host port 9092, for initial connection (Initial Contact Point) and getting Cluster metadata
-        config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
 
 //        Serialising data
         config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
@@ -63,4 +67,9 @@ public class JobPublisher {
         return new KafkaProducer<>(config);
     }
 
+    @Override
+    public void close() {
+        producer.flush();
+        producer.close();
+    }
 }

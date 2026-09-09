@@ -13,10 +13,16 @@ public class JobScheduler {
 
     private static final Logger log = LoggerFactory.getLogger(JobScheduler.class);
     private static final String GROUP = "CronGroup";
+    private final JobPublisher publisher;
+
+    public JobScheduler(JobPublisher publisher) {
+        this.publisher = publisher;
+    }
 
     public void startApp(String fileName) throws SchedulerException, IOException {
 
         Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
+        scheduler.getContext().put(JobPublisher.CONTEXT_KEY, publisher);
 
         try (
                 BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
@@ -41,15 +47,19 @@ public class JobScheduler {
 
         String quartzCron = CronTab.getQuartzCron(line);
         String command = CronTab.getCommand(line);
+        String schedule = CronTab.getSchedule(line);
+
 
         JobDetail job = JobBuilder.newJob(CronJob.class)
-                .withIdentity("CronJob" + jobId, GROUP)
+                .withIdentity("CronJob-" + jobId, GROUP)
                 .usingJobData(CronJob.JOB_ID, jobId)
                 .usingJobData(CronJob.COMMAND, command)
+                .usingJobData(CronJob.CRON_EXPRESSION, schedule)
+
                 .build();
 
         Trigger trigger = TriggerBuilder.newTrigger()
-                .withIdentity("CronTrigger" + jobId, GROUP)
+                .withIdentity("CronTrigger-" + jobId, GROUP)
                 .withSchedule(CronScheduleBuilder.cronSchedule(quartzCron))
                 .build();
 

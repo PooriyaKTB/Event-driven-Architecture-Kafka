@@ -37,11 +37,13 @@ services:
       - zoo1
 
   producer:
-    build: ./kafkaProducer
+    build:
+      context: .
+      dockerfile: kafkaProducer/Dockerfile
     depends_on:
       - kafka1
     environment:
-      KAFKA_BROKER: kafka:9092
+      KAFKA_BROKER: kafka1:19092
 
   consumer-1:
     build: ./kafkaConsumer
