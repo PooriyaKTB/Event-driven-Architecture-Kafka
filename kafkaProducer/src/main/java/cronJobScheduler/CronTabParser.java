@@ -9,10 +9,10 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
-public class ParseCronTab {
+public class CronTabParser {
     public static void startApp(String fileName) {
 
-        Logger log = LoggerFactory.getLogger(ParseCronTab.class);
+        Logger log = LoggerFactory.getLogger(CronTabParser.class);
 
         try (
                 BufferedReader reader = new BufferedReader(new FileReader(fileName))) {

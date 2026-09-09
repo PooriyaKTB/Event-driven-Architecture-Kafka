@@ -5,6 +5,6 @@ public class Main {
 
         String fileName = "crontab.txt";
 
-        ParseCronTab.startApp(fileName);
+        CronTabParser.startApp(fileName);
     }
 }
