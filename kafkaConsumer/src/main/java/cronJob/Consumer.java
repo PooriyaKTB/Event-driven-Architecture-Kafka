@@ -1,4 +1,4 @@
-package consumer;
+package cronJob;
 
 import java.time.Duration;
 import java.util.Collections;
@@ -24,8 +24,8 @@ public class Consumer {
             consumer.subscribe(Collections.singleton(topic));
 
             while (true) {
-                ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(1000));
-                for (ConsumerRecord<String, String> record : records) {
+                ConsumerRecords<String, String> kafkaRecords = consumer.poll(Duration.ofMillis(1000));
+                for (ConsumerRecord<String, String> record : kafkaRecords) {
 //                    log.info(String.valueOf(record));
                     log.info("Received -> Key: {}, Partition: {}, Offset: {}, Value: {}", record.key(), record.partition(), record.offset(), record.value());
                 }
