@@ -10,7 +10,9 @@ public class Main {
 
 
     public static void main(String[] args) {
+
         JobPublisher jobPublisher = new JobPublisher();
+        Runtime.getRuntime().addShutdownHook(new Thread(jobPublisher::close));
 
         try {
             new JobScheduler(jobPublisher).startApp(CRONTAB_FILE);

@@ -1,4 +1,8 @@
 0 * * * * echo first job
+#(Every exact hours)
 10 * * * * echo second job
+#(Every hour at 10th minute)
 * * * * * echo third job
+#(Every minute)
 0 1 * * * echo last job
+#(Every 1:00)
