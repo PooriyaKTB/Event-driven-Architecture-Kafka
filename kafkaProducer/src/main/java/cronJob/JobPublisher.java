@@ -27,7 +27,7 @@ public class JobPublisher implements AutoCloseable {
     public static final String CONTEXT_KEY = "jobPublisher";
 
     private static final String TOPIC = "cron-jobs";
-    private static final int PARTITIONS = 1;
+    private static final int PARTITIONS = 2;
     private static final short REPLICATION_FACTOR = 1;
 
     private static final String BOOTSTRAP_SERVERS =
